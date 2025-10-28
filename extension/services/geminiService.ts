@@ -3,7 +3,7 @@ import type { Post } from '../types';
 
 /**
  * Generates a complete LinkedIn post with text and optionally a custom image.
- * @param topic - The user-provided topic for the post.
+ * @param topic - The user-provided topic for the post. Can be empty.
  * @param includeImage - Whether to generate an image for the post.
  * @param apiKey - The user's Google AI Studio API key.
  * @param postHistory - Optional string of the user's last 5-10 posts for context.
@@ -13,16 +13,17 @@ export const generateFullPost = async (topic: string, includeImage: boolean, api
   const ai = new GoogleGenAI({ apiKey });
 
   const historyContext = postHistory?.trim() 
-    ? `For context, here are the user's previous posts. Analyze their style, tone, and common topics to make the new post feel authentic to them:
----
-${postHistory}
----
-` 
+    ? `For context, here is the user's recent post history. Analyze their style, tone, and common topics to make the new post feel authentic to them:\n---\n${postHistory}\n---\n` 
     : '';
 
-  try {
-    // Step 1: Generate the post text with a strong hook and more hashtags.
-    const textPrompt = `${historyContext}Write a professional and viral-worthy LinkedIn post about "${topic}".
+  let basePrompt = '';
+  if (topic.trim()) {
+    basePrompt = `Write a professional and viral-worthy LinkedIn post about "${topic}".`;
+  } else {
+    basePrompt = `You are an expert LinkedIn content strategist. Based *only* on the provided post history, generate a single, completely new LinkedIn post suggestion. The new post should be on a relevant topic that the user's audience would likely enjoy, written in the user's unique style and tone. Do not just rephrase an old post. Come up with a fresh idea.`
+  }
+
+  const fullTextPrompt = `${historyContext}${basePrompt}
 
 Your post MUST follow these rules:
 1.  **Start with a killer hook in bold:** The entire first line MUST be bold using Markdown (\`**text**\`). Begin with a powerful question, a surprising statistic, a bold statement, or a relatable problem to immediately grab the reader's attention.
@@ -32,13 +33,12 @@ Your post MUST follow these rules:
 5.  **Provide value:** Offer insights, tips, or a unique perspective.
 6.  **Engage the audience:** End with a clear call-to-action or a question.
 7.  **Hashtags:** Include a block of 10-15 relevant hashtags at the end.
-8.  **Length:** Keep the post well under the 3000-character LinkedIn limit.
+8.  **Length:** Keep the post well under the 3000-character LinkedIn limit.`;
 
-Topic: "${topic}"`;
-    
+  try {
     const textResponse = await ai.models.generateContent({
       model: 'gemini-2.5-pro',
-      contents: textPrompt,
+      contents: fullTextPrompt,
       config: {
         systemInstruction: "You are an expert LinkedIn content creator specializing in viral growth for a software engineering audience. Your response must be only the post content itself, ready to be copied and pasted. Do not include any introductory phrases like 'Of course!' or 'Here is the post...'.",
       }
@@ -48,7 +48,6 @@ Topic: "${topic}"`;
     let imageUrl = '';
 
     if (includeImage) {
-      // Step 2: Generate a detailed prompt for a professional, software-engineer-focused image.
       const imagePromptGeneratorPrompt = `Based on the following LinkedIn post, create a detailed prompt for an image generation model. The goal is a playful, creative, and eye-catching graphic that will appeal to a software engineering audience.
 
 The prompt MUST describe:
@@ -72,7 +71,6 @@ ${postText}
       });
       const finalImagePrompt = imagePromptResponse.text;
 
-      // Step 3: Generate the image using the new, detailed prompt.
       const imageResponse = await ai.models.generateContent({
         model: 'gemini-2.5-flash-image',
         contents: {
@@ -87,7 +85,7 @@ ${postText}
         if (part.inlineData) {
           const base64ImageBytes: string = part.inlineData.data;
           imageUrl = `data:${part.inlineData.mimeType};base64,${base64ImageBytes}`;
-          break; // Exit after finding the first image
+          break;
         }
       }
       

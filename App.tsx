@@ -14,7 +14,10 @@ import ApiKeyModal from './components/ApiKeyModal';
 
 const App: React.FC = () => {
   const [apiKey, setApiKey] = useState<string | null>(null);
+  const [hasApiKey, setHasApiKey] = useState<boolean>(false);
+  
   const [topic, setTopic] = useState<string>('');
+  const [postHistory, setPostHistory] = useState<string>('');
   const [includeImage, setIncludeImage] = useState<boolean>(true);
   const [post, setPost] = useState<Post | null>(null);
   const [editedText, setEditedText] = useState<string>('');
@@ -22,21 +25,26 @@ const App: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check for API key in localStorage on initial load
     const storedApiKey = localStorage.getItem('gemini-api-key');
     if (storedApiKey) {
       setApiKey(storedApiKey);
+      setHasApiKey(true);
     }
   }, []);
 
   const handleSaveApiKey = (key: string) => {
     localStorage.setItem('gemini-api-key', key);
     setApiKey(key);
+    setHasApiKey(true);
   };
 
   const handleClearApiKey = () => {
     localStorage.removeItem('gemini-api-key');
     setApiKey(null);
+    setHasApiKey(false);
+    setPost(null);
+    setTopic('');
+    setPostHistory('');
   };
 
   const handleGeneratePost = useCallback(async () => {
@@ -53,7 +61,7 @@ const App: React.FC = () => {
     setPost(null);
 
     try {
-      const newPost = await generateFullPost(topic, includeImage, apiKey);
+      const newPost = await generateFullPost(topic, includeImage, apiKey, postHistory);
       const parsedText = parseLinkedInMarkdown(newPost.text);
       setPost(newPost);
       setEditedText(parsedText);
@@ -63,35 +71,29 @@ const App: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [topic, includeImage, apiKey]);
+  }, [topic, includeImage, apiKey, postHistory]);
   
   const handleNewPost = () => {
     setPost(null);
     setTopic('');
+    setPostHistory('');
     setEditedText('');
     setError(null);
   };
 
-  if (!apiKey) {
-    return <ApiKeyModal onSaveKey={handleSaveApiKey} />;
-  }
+  const renderContent = () => {
+    if (!hasApiKey) {
+      return <ApiKeyModal onSaveKey={handleSaveApiKey} />;
+    }
 
-  return (
-    <div className="bg-[#FDF9F2] min-h-screen text-[#333]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Header onClearApiKey={handleClearApiKey} />
-        <main className="mt-8">
-          <div className="max-w-2xl mx-auto">
+    return (
+      <main className="mt-8">
+        {!post ? (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+            {/* Left Column: Topic Input */}
             <div className="bg-white p-6 rounded-xl border-2 border-black shadow-[8px_8px_0px_#000]">
-              <div className="flex justify-between items-center mb-2">
-                 <h2 className="text-2xl font-bold">What's your post about?</h2>
-                 {post && (
-                    <Button onClick={handleNewPost} variant="secondary" className="!w-auto !py-1 !text-base">
-                      Create New Post
-                    </Button>
-                 )}
-              </div>
-              <p className="text-gray-600 mb-4">
+              <h2 className="text-2xl font-bold">Create a post from scratch</h2>
+              <p className="text-gray-600 my-4">
                 Enter a topic, and we'll draft a LinkedIn post with a custom graphic for you.
               </p>
               <div className="space-y-4">
@@ -113,33 +115,60 @@ const App: React.FC = () => {
                 </Button>
               </div>
             </div>
+            
+            {/* Right Column: Context Input */}
+            <div className="bg-white p-6 rounded-xl border-2 border-black shadow-[8px_8px_0px_#000]">
+              <h2 className="text-2xl font-bold">...or personalize it (Optional)</h2>
+               <p className="text-gray-600 my-4">
+                Paste your last 5-10 posts here. The AI will learn your writing style to make the new post feel more like you!
+              </p>
+              <TextInput
+                rows={10}
+                value={postHistory}
+                onChange={(e) => setPostHistory(e.target.value)}
+                placeholder="Paste your recent post text here..."
+                disabled={isLoading}
+              />
+            </div>
           </div>
-          
-          {isLoading && <Loader />}
-          
-          {error && (
-            <div className="mt-6 max-w-2xl mx-auto bg-red-100 border-2 border-red-500 text-red-700 px-4 py-3 rounded-lg relative shadow-[4px_4px_0px_#EF4444]" role="alert">
-              <strong className="font-bold">Oops! </strong>
-              <span className="block sm:inline">{error}</span>
-            </div>
-          )}
-          
-          {!isLoading && post && (
-            <div className="mt-8">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-                <PostEditor 
-                  postText={editedText}
-                  onTextChange={setEditedText}
-                  imageUrl={post.imageUrl}
-                />
-                <PostPreview 
-                  editedText={editedText}
-                  imageUrl={post.imageUrl}
-                />
+        ) : (
+          <div>
+              <div className="max-w-md mx-auto mb-6">
+                <Button onClick={handleNewPost} variant="secondary" className="w-full">
+                  Create a New Post
+                </Button>
               </div>
-            </div>
-          )}
-        </main>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                  <PostEditor 
+                    postText={editedText}
+                    onTextChange={setEditedText}
+                    imageUrl={post.imageUrl}
+                  />
+                  <PostPreview 
+                    editedText={editedText}
+                    imageUrl={post.imageUrl}
+                  />
+              </div>
+          </div>
+        )}
+        
+        {isLoading && <Loader />}
+        
+        {error && (
+          <div className="mt-6 max-w-2xl mx-auto bg-red-100 border-2 border-red-500 text-red-700 px-4 py-3 rounded-lg relative shadow-[4px_4px_0px_#EF4444]" role="alert">
+            <strong className="font-bold">Oops! </strong>
+            <span className="block sm:inline">{error}</span>
+          </div>
+        )}
+      </main>
+    );
+  };
+
+  return (
+    <div className="bg-[#FDF9F2] min-h-screen text-[#333]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <Header onClearApiKey={hasApiKey ? handleClearApiKey : undefined} />
+        {renderContent()}
       </div>
     </div>
   );

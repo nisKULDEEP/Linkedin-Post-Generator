@@ -2,25 +2,41 @@
 
 ![A screenshot of the LinkedIn Post Drafter app showing the input form, the post editor, and the live preview.](https://i.imgur.com/3g7F9oT.png)
 
-A creative, doodle-themed AI tool to help you draft viral-worthy LinkedIn posts in seconds. This application leverages the power of the Google Gemini API to generate engaging, professional LinkedIn posts complete with custom, AI-generated graphics.
+A creative, doodle-themed AI tool to help you draft viral-worthy LinkedIn posts in seconds. This project includes a V1 web application and a powerful V2 browser extension.
 
 It operates on a **"Bring Your Own Key" (BYOK)** model, meaning you can run it locally or deploy it yourself without any server-side costs.
 
+---
+
+## V1: Web Application
+
+The original version of the app, which runs as a standalone website.
+
 **Live Demo:** [https://thevectorcamp.in/](https://thevectorcamp.in/)
+
+### ✨ V1 Features
+
+-   **🤖 AI-Powered Text & Image Generation:** Uses **Gemini 2.5 Pro** for text and **Nano Banana** for unique, doodle-style graphics.
+-   **🔑 Bring Your Own Key (BYOK):** Use your own free Google AI Studio API key, stored securely in your browser's local storage.
+-   **✍️ Rich Text Editor & Live Preview:** A custom editor converts **bold** and *italic* text to Unicode, with a realistic preview.
+-   **🔗 Post Directly to LinkedIn:** A streamlined workflow to download your image and open the LinkedIn composer with your text pre-filled.
+-   **💧 Branded Images:** All graphics are automatically watermarked with `thevectorcamp.in`.
 
 ---
 
-## ✨ Features
+## V2: Browser Extension (New!)
 
--   **🤖 AI-Powered Text Generation:** Uses **Gemini 2.5 Pro** to write compelling post copy with killer hooks, emojis, and relevant hashtags.
--   **🎨 AI-Powered Image Generation:** Leverages **Nano Banana (`gemini-2.5-flash-image`)** to create unique, colorful doodle-style graphics tailored to your post content.
--   **🔑 Bring Your Own Key (BYOK):** No sign-up required. Just use your own free Google AI Studio API key. Your key is stored securely in your browser's local storage.
--   **✍️ Rich Text Editor:** A custom-built editor that converts **bold** and *italic* text into the special Unicode characters that LinkedIn recognizes, making your posts stand out.
--   **🪄 Automatic Formatting:** The AI's Markdown suggestions (`**bold**`, `*italic*`) are automatically converted to formatted Unicode text upon generation.
--   **👀 Realistic Live Preview:** See exactly how your post will look on LinkedIn, including a realistic name/profile picture, engagement stats, and a clickable `...more` link for longer posts.
--   **🔗 Post Directly to LinkedIn:** A "Post on LinkedIn" button downloads your image and opens the LinkedIn composer with your post text pre-filled.
--   **🖼️ Optional Graphics:** Don't need an image? Simply toggle it off to generate a text-only post.
--   **💧 Branded Images:** All generated graphics are automatically watermarked with `thevectorcamp.in`.
+A powerful browser extension that brings the post drafter directly into your LinkedIn workflow. The user never has to leave LinkedIn!
+
+### ✨ V2 Features
+
+-   **💡 Three Generation Modes:**
+    1.  **Analyze & Suggest:** Automatically scrapes your last 10 posts for context and suggests a new post idea.
+    2.  **Custom Prompt:** Provide a specific topic for the AI to write about.
+    3.  **Combined Mode:** Provide a topic, and the AI uses your post history to match your unique tone and style.
+-   **🤖 Automated Context Gathering:** No more manual copy-pasting! The extension uses a content script to automatically read and analyze your recent posts directly from your LinkedIn profile page.
+-   ** seamlessly Integrated Workflow:** Generate, edit, and post directly from a popup while on LinkedIn.
+-   **All the great features from V1:** Includes BYOK (using `chrome.storage`), rich text editing, realistic previews, and the direct-to-LinkedIn posting flow.
 
 ---
 
@@ -29,19 +45,22 @@ It operates on a **"Bring Your Own Key" (BYOK)** model, meaning you can run it l
 -   **Frontend:** React, TypeScript
 -   **Styling:** Tailwind CSS
 -   **AI:** Google Gemini API (`@google/genai`)
+-   **Extension:** Web Extension APIs (`chrome.storage`, `chrome.scripting`)
 
 ---
 
-## 🚀 Getting Started (Local Setup)
+## 🚀 Getting Started
 
-Follow these instructions to get a copy of the project up and running on your local machine for development and testing purposes.
+### V1: Running the Web App Locally
 
-### Prerequisites
+Follow these instructions to run the V1 web application on your local machine.
+
+#### Prerequisites
 
 -   [Node.js](https://nodejs.org/) (v18 or later recommended)
 -   `npm` or `yarn` package manager
 
-### Installation
+#### Installation
 
 1.  **Clone the repository:**
     ```sh
@@ -62,7 +81,7 @@ Follow these instructions to get a copy of the project up and running on your lo
     -   Copy the generated API key. It's free!
 
 4.  **Run the development server:**
-    This project is configured to work with Vite. Run the following command to start the local server:
+    This project is configured to work with Vite. Run the following command:
     ```sh
     npm run dev
     # or
@@ -72,36 +91,49 @@ Follow these instructions to get a copy of the project up and running on your lo
 
 5.  **Use the App:**
     -   Open the app in your browser.
-    -   You will be prompted to enter your Google AI Studio API key. Paste the key you copied in Step 3 and click "Save".
-    -   You're all set! Start generating amazing LinkedIn posts.
+    -   You will be prompted to enter your Google AI Studio API key. Paste the key you copied and click "Save".
+    -   You're all set!
 
 ---
 
-## 💡 How It Works
+### V2: Running the Browser Extension Locally
 
-1.  The user provides a topic and chooses whether to include a graphic.
-2.  The app sends a detailed prompt to **Gemini 2.5 Pro** to generate the post text, instructing it to use a specific structure and Markdown for formatting.
-3.  If an image is requested, the generated text is sent back to **Gemini 2.5 Pro** to create a highly descriptive image prompt tailored for a creative, doodle-style graphic.
-4.  This new prompt is sent to the **Nano Banana (`gemini-2.5-flash-image`)** model, which generates the final image, complete with the `thevectorcamp.in` watermark.
-5.  The app parses the generated Markdown text into Unicode and displays the post and image in an editor/preview layout.
-6.  The user can make final edits, copy the text, and use the "Post on LinkedIn" button to publish.
+Follow these instructions to load the V2 extension into your browser for testing.
 
----
+#### Prerequisites
 
-## 🤝 Contributing
+-   A Chromium-based browser like Google Chrome, Microsoft Edge, or Brave.
+-   You must have completed steps 1 and 2 from the V1 installation above.
 
-Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+#### Build Step
 
-If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
+The extension files need to be bundled to work in the browser. Run the following command from the project's root directory:
 
-1.  Fork the Project
-2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4.  Push to the Branch (`git push origin feature/AmazingFeature`)
-5.  Open a Pull Request
+```sh
+npm run build:extension
+# or
+yarn build:extension
+```
+This command will compile the TypeScript files in the `extension` directory and output the necessary JavaScript files into a new `extension/dist` folder.
 
----
+#### Loading the Extension in Your Browser (using Chrome as an example)
 
-## 📄 License
+1.  **Open the Extension Management page:**
+    -   Navigate to `chrome://extensions` in your Chrome browser.
 
-Distributed under the MIT License.
+2.  **Enable Developer Mode:**
+    -   In the top right corner of the page, toggle the "**Developer mode**" switch to be **On**.
+
+3.  **Load the extension:**
+    -   Click the "**Load unpacked**" button that appears on the top left.
+    -   A file selection dialog will open. Navigate to this project's directory and select the **`extension`** folder.
+    -   Click "Select Folder".
+
+4.  **Done!** The "LinkedIn Post Drafter (Extension)" should now appear in your list of extensions. Pin it to your toolbar for easy access!
+
+5.  **Use the Extension:**
+    -   Navigate to [LinkedIn](https://www.linkedin.com).
+    -   Click the extension icon in your toolbar.
+    -   The first time you open it, it will ask for your Google AI Studio API key. Save your key.
+    -   To use the "Analyze" or "Combined" modes, first navigate to your own profile page where your posts are visible.
+    -   Start generating!
