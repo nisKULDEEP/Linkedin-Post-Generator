@@ -34,7 +34,9 @@ const PostEditor: React.FC<PostEditorProps> = ({ postText, onTextChange, imageUr
   const proceedToLinkedIn = useCallback(() => {
     setIsModalOpen(false);
     const postAction = () => {
-      const linkedInUrl = `https://www.linkedin.com/shareArticle?mini=true&text=${encodeURIComponent(postText)}`;
+      // Added a 'source' parameter to the URL to override the default branding
+      const source = encodeURIComponent('TheVectorCamp.in');
+      const linkedInUrl = `https://www.linkedin.com/shareArticle?mini=true&text=${encodeURIComponent(postText)}&source=${source}`;
       window.open(linkedInUrl, '_blank', 'noopener,noreferrer');
     };
 
