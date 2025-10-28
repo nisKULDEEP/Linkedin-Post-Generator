@@ -16,7 +16,11 @@ import ToggleSwitch from './components/ToggleSwitch';
 import { parseLinkedInMarkdown } from './utils/unicodeConverter';
 import ApiKeyModal from './components/ApiKeyModal';
 
+console.log("popup.tsx: Script start.");
+
 const Popup: React.FC = () => {
+  console.log("Popup: Component rendering start.");
+
   const [apiKey, setApiKey] = useState<string | null>(null);
   const [hasApiKey, setHasApiKey] = useState<boolean>(false);
   
@@ -32,23 +36,33 @@ const Popup: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    chrome.storage.local.get('gemini-api-key', (result) => {
+    console.log("Popup: useEffect for API key check triggered.");
+    chrome.storage.local.get('gemini-api-key', (result: { [key: string]: any }) => {
+      console.log("Popup: chrome.storage.local.get result:", result);
       if (result['gemini-api-key']) {
+        console.log("Popup: API key found in storage.");
         setApiKey(result['gemini-api-key']);
         setHasApiKey(true);
+      } else {
+        console.log("Popup: No API key found in storage.");
+        setHasApiKey(false); // Explicitly set to false if not found
       }
     });
   }, []);
 
   const handleSaveApiKey = (key: string) => {
+    console.log("Popup: Saving API key to storage.");
     chrome.storage.local.set({ 'gemini-api-key': key }, () => {
+      console.log("Popup: API key saved successfully.");
       setApiKey(key);
       setHasApiKey(true);
     });
   };
 
   const handleClearApiKey = () => {
+    console.log("Popup: Clearing API key from storage.");
     chrome.storage.local.remove('gemini-api-key', () => {
+      console.log("Popup: API key cleared.");
       setApiKey(null);
       setHasApiKey(false);
       setPost(null);
@@ -59,8 +73,12 @@ const Popup: React.FC = () => {
   };
 
   const handleAnalyzePosts = useCallback(async () => {
+    console.log("Popup: handleAnalyzePosts called.");
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (!tab.id) return;
+    if (!tab.id) {
+        console.error("Popup: No active tab found.");
+        return;
+    }
   
     setIsScraping(true);
     setError(null);
@@ -68,11 +86,13 @@ const Popup: React.FC = () => {
     setPostHistory('');
   
     try {
+      console.log("Popup: Executing content script.");
       const results = await chrome.scripting.executeScript({
         target: { tabId: tab.id },
         files: ['dist/content-script.js'],
       });
       
+      console.log("Popup: Content script execution result:", results);
       if (results && results[0] && results[0].result) {
         const { history, count } = results[0].result as { history: string; count: number };
         if (!history.trim() || count === 0) {
@@ -81,9 +101,11 @@ const Popup: React.FC = () => {
             setPostHistory(history);
             setContextStatus(`✅ Context from ${count} recent posts loaded!`);
         }
+      } else {
+        setError("Analysis returned no data. Are you on your LinkedIn profile's post activity page?");
       }
     } catch (e) {
-      console.error("Scraping error:", e);
+      console.error("Popup: Scraping error:", e);
       setError("Failed to analyze posts. Ensure you're on your LinkedIn profile page and refresh if needed.");
     } finally {
       setIsScraping(false);
@@ -96,7 +118,6 @@ const Popup: React.FC = () => {
       return;
     }
     
-    // Allow generation if either topic or context is present
     if (!topic.trim() && !postHistory.trim()) {
         setError('Please enter a topic or analyze recent posts first.');
         return;
@@ -124,9 +145,9 @@ const Popup: React.FC = () => {
     setTopic('');
     setEditedText('');
     setError(null);
-    // Keep post history and status
   };
   
+  console.log("Popup: Checking hasApiKey state:", hasApiKey);
   if (!hasApiKey) {
     return <ApiKeyModal onSaveKey={handleSaveApiKey} />;
   }
@@ -206,12 +227,26 @@ const Popup: React.FC = () => {
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
+  console.error("Fatal: Could not find root element to mount to.");
   throw new Error("Could not find root element to mount to");
 }
 
-const root = ReactDOM.createRoot(rootElement);
-root.render(
-  <React.StrictMode>
-    <Popup />
-  </React.StrictMode>
-);
+try {
+  console.log("popup.tsx: Attempting to render React app.");
+  const root = ReactDOM.createRoot(rootElement);
+  root.render(
+    <React.StrictMode>
+      <Popup />
+    </React.StrictMode>
+  );
+  console.log("popup.tsx: React app rendered successfully.");
+} catch (error) {
+  console.error("popup.tsx: CRITICAL - Failed to render React app.", error);
+  rootElement.innerHTML = `
+    <div style="padding: 1rem; text-align: center; font-family: sans-serif; color: red;">
+      <h2>Something went wrong!</h2>
+      <p>The extension failed to load. Please check the console for errors.</p>
+      <p style="font-size: 0.8em; color: grey;">Right-click the extension icon and select "Inspect popup".</p>
+    </div>
+  `;
+}
