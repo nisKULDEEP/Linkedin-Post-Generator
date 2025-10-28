@@ -6,7 +6,7 @@ A creative, doodle-themed AI tool to help you draft viral-worthy LinkedIn posts 
 
 It operates on a **"Bring Your Own Key" (BYOK)** model, meaning you can run it locally or deploy it yourself without any server-side costs.
 
-**Live Demo:** `[Link to your deployed app, e.g., https://linkedin-drafter.thevectorcamp.in]`
+**Live Demo:** [https://thevectorcamp.in/](https://thevectorcamp.in/)
 
 ---
 

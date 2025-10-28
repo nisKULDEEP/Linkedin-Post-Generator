@@ -15,7 +15,7 @@ const Header: React.FC<HeaderProps> = ({ onClearApiKey }) => {
         Generate professional posts with AI-powered text and graphics.
       </p>
       <p className="mt-1 text-sm text-gray-500">
-        A project by <a href="https://www.thevectorcamp.in" target="_blank" rel="noopener noreferrer" className="underline hover:text-amber-600">thevectorcamp.in</a>
+        A project by <a href="https://thevectorcamp.in/" target="_blank" rel="noopener noreferrer" className="underline hover:text-amber-600">thevectorcamp.in</a>
       </p>
       <div className="absolute top-0 right-0">
          <Button onClick={onClearApiKey} variant="secondary" className="!w-auto !py-1 !text-sm">
