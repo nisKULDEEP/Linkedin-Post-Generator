@@ -1,0 +1,5 @@
+{
+  "name": "LinkedIn Post Drafter",
+  "description": "Generate engaging LinkedIn posts with doodle-style graphics. Simply provide a topic, and the app uses Gemini 2.5 Pro for text and Nano Banana for the image, creating a complete post ready for sharing.",
+  "requestFramePermissions": []
+}
