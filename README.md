@@ -98,23 +98,11 @@ Follow these instructions to run the V1 web application on your local machine.
 
 ### V2: Running the Browser Extension Locally
 
-Follow these instructions to load the V2 extension into your browser for testing.
+Follow these instructions to load the V2 extension into your browser for testing. **No build step is required!**
 
 #### Prerequisites
 
 -   A Chromium-based browser like Google Chrome, Microsoft Edge, or Brave.
--   You must have completed steps 1 and 2 from the V1 installation above.
-
-#### Build Step
-
-The extension files need to be bundled to work in the browser. Run the following command from the project's root directory:
-
-```sh
-npm run build:extension
-# or
-yarn build:extension
-```
-This command will compile the TypeScript files in the `extension` directory and output the necessary JavaScript files into a new `extension/dist` folder.
 
 #### Loading the Extension in Your Browser (using Chrome as an example)
 
